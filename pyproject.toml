@@ -2,10 +2,35 @@
 name = "sfirat-haomer"
 version = "1.0.0"
 description = "Get Sefirat HaOmer count and text by Hebrew or Gregorian date"
-authors = [{name="Your Name", email="your.email@example.com"}]
+authors = [{name="Efrat Bdil", email="efrat.developer@gmail.com"}]
 license = {text = "MIT"}
-dependencies = ["convertdate"]
+dependencies = ["convertdate>=2.4.0"]
+requires-python = ">=3.8"
+readme = "README.md"
+keywords = ["hebrew", "jewish", "calendar", "omer", "sefirat"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Religion",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/efrat-dev/sefirat-haomer"
+Repository = "https://github.com/efrat-dev/sefirat-haomer"
+Issues = "https://github.com/efrat-dev/sefirat-haomer/issues"
 
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sfirat_haomer*"]
