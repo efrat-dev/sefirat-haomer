@@ -50,51 +50,38 @@ CLI Usage:
     # python cli.py export --format json
 """
 
-# Core classes and enums
-from .core import (
-    OmerDay,
-    OmerCalculator,
-    OmerMonth,
-    OmerTradition,
-    SefiraInfo
-)
-
-# Main functions - most commonly used
-from .core import (
+# Core imports from the new modular structure
+from .models.omer_day import OmerDay
+from .models.sefirah import SefiraInfo
+from .models.enums import OmerMonth, OmerTradition
+from .calculators.omer_calculator import OmerCalculator
+from .services.omer_service import (
     get_omer_text_by_date,
+    get_all_omer_days,
+    get_omer_days_by_week,
     get_current_omer_status,
     get_omer_day_by_number,
-    get_all_omer_days
-)
-
-# Week and date range functions
-from .core import (
-    get_omer_days_by_week,
+    find_special_omer_days,
     find_omer_day_by_gregorian_range,
-    find_special_omer_days
+    get_omer_summary_by_sefirah
 )
+from .services.export_service import export_omer_calendar
+from .utils.validation import validate_omer_configuration
+from .config import get_config, set_config, OmerConfig, OutputFormat, DateFormat
 
-# Sefirot and spiritual content
-from .core import (
-    get_sefirot_attributes,
-    get_omer_summary_by_sefirah,
-    get_ana_bekoach_text
-)
-
-# Utility and export functions
-from .core import (
-    export_omer_calendar,
-    validate_omer_configuration
-)
-
-# Configuration
-from .config import (
-    OmerConfig,
-    OutputFormat,
-    DateFormat,
-    get_config,
-    set_config
-)
+# Additional services that may exist
+try:
+    from .services.sefirot_service import (
+        get_sefirot_attributes,
+        get_ana_bekoach_text
+    )
+except ImportError:
+    # If sefirot service doesn't exist, create placeholder functions
+    def get_sefirot_attributes(*args, **kwargs):
+        return {"error": "Sefirot service not available"}
+    
+    def get_ana_bekoach_text(*args, **kwargs):
+        return {"error": "Ana BeKoach service not available"}
 
 # Try to import CLI-related exceptions if available
 try:
@@ -115,8 +102,8 @@ except ImportError:
 
 # Version info
 __version__ = "1.0.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+__author__ = "Omer Package Team"
+__email__ = "info@omer-package.com"
 __description__ = "A comprehensive library for Sefirat HaOmer calculations and display"
 __url__ = "https://github.com/yourusername/omer-counter"
 __license__ = "MIT"
@@ -205,7 +192,6 @@ def today(config=None, tradition=None):
     Returns:
         dict: Current Omer status
     """
-    from .core import OmerTradition
     if tradition is None:
         tradition = OmerTradition.ASHKENAZI
     return get_current_omer_status(config, tradition)
@@ -223,7 +209,6 @@ def day(number, config=None, tradition=None):
     Returns:
         OmerDay: Omer day object or error string
     """
-    from .core import OmerTradition
     if tradition is None:
         tradition = OmerTradition.ASHKENAZI
     return get_omer_day_by_number(number, config, tradition)
@@ -242,7 +227,6 @@ def week(number, hebrew_year=None, config=None, tradition=None):
     Returns:
         list: List of OmerDay objects for the week
     """
-    from .core import OmerTradition
     if tradition is None:
         tradition = OmerTradition.ASHKENAZI
     return get_omer_days_by_week(number, hebrew_year, config, tradition)
