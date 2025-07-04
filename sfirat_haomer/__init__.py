@@ -1,14 +1,14 @@
 """
-Sefirat HaOmer Counter Library
-=============================
+Sfirat HaOmer Package
+====================
 
-A comprehensive Python library for calculating and displaying Sefirat HaOmer 
+A comprehensive Python library for calculating and displaying Sfirat HaOmer 
 (Counting of the Omer) with support for Hebrew dates, multiple traditions, 
 and Kabbalistic Sefirot information.
 
 Basic Usage:
 -----------
-    from omer_counter import get_omer_text_by_date, get_current_omer_status
+    from sfirat_haomer import get_omer_text_by_date, get_current_omer_status
     
     # Get today's Omer count
     today_omer = get_current_omer_status()
@@ -25,12 +25,12 @@ Advanced Features:
     calendar = export_omer_calendar(format_type="json")
     
     # Configure output
-    from omer_counter.config import OmerConfig, OutputFormat
+    from sfirat_haomer.config import OmerConfig, OutputFormat
     config = OmerConfig(output_format=OutputFormat.DETAILED)
 
 Quick Access:
 ------------
-    from omer_counter import today, day, week
+    from sfirat_haomer import today, day, week
     
     # Get today's Omer
     today_status = today()
@@ -43,14 +43,14 @@ Quick Access:
 
 CLI Usage:
 ---------
-    # Command line interface available via cli.py
-    # python cli.py today --blessing
-    # python cli.py day 33
-    # python cli.py week 1
-    # python cli.py export --format json
+    # Command line interface available
+    # python -m sfirat_haomer.cli today --blessing
+    # python -m sfirat_haomer.cli day 33
+    # python -m sfirat_haomer.cli week 1
+    # python -m sfirat_haomer.cli export --format json
 """
 
-# Core imports from the new modular structure
+# Core imports from the main package structure
 from .models.omer_day import OmerDay
 from .models.sefirah import SefiraInfo
 from .models.enums import OmerMonth, OmerTradition
@@ -83,6 +83,14 @@ except ImportError:
     def get_ana_bekoach_text(*args, **kwargs):
         return {"error": "Ana BeKoach service not available"}
 
+# Try to import CLI interface if available
+try:
+    from .cli.main import cli
+    _CLI_AVAILABLE = True
+except ImportError:
+    _CLI_AVAILABLE = False
+    cli = None
+
 # Try to import CLI-related exceptions if available
 try:
     from .exceptions import (
@@ -96,20 +104,20 @@ try:
         validate_cli_output_format,
         validate_cli_file_path
     )
-    _CLI_AVAILABLE = True
+    _CLI_EXCEPTIONS_AVAILABLE = True
 except ImportError:
-    _CLI_AVAILABLE = False
+    _CLI_EXCEPTIONS_AVAILABLE = False
 
 # Version info
 __version__ = "1.0.0"
-__author__ = "Omer Package Team"
-__email__ = "info@omer-package.com"
-__description__ = "A comprehensive library for Sefirat HaOmer calculations and display"
-__url__ = "https://github.com/yourusername/omer-counter"
+__author__ = "Sfirat HaOmer Team"
+__email__ = "info@sfirat-haomer.com"
+__description__ = "A comprehensive library for Sfirat HaOmer calculations and display"
+__url__ = "https://github.com/yourusername/sfirat-haomer"
 __license__ = "MIT"
 
 # Package metadata
-__package_name__ = "omer-counter"
+__package_name__ = "sfirat-haomer"
 __python_requires__ = ">=3.7"
 __dependencies__ = [
     "convertdate>=2.0.0",
@@ -121,7 +129,7 @@ __cli_dependencies__ = [
     "click>=8.0.0"
 ]
 
-# Define what gets imported with "from omer_counter import *"
+# Define what gets imported with "from sfirat_haomer import *"
 __all__ = [
     # Core classes
     "OmerDay",
@@ -166,8 +174,12 @@ __all__ = [
     "__version__"
 ]
 
-# Add CLI exceptions to __all__ if available
+# Add CLI to __all__ if available
 if _CLI_AVAILABLE:
+    __all__.append("cli")
+
+# Add CLI exceptions to __all__ if available
+if _CLI_EXCEPTIONS_AVAILABLE:
     __all__.extend([
         "OmerCLIError",
         "OmerCLIArgumentError", 
@@ -313,7 +325,7 @@ def get_cli_status():
     """
     status = {
         "cli_available": _CLI_AVAILABLE,
-        "exceptions_available": _CLI_AVAILABLE,
+        "exceptions_available": _CLI_EXCEPTIONS_AVAILABLE,
         "click_available": False
     }
     
@@ -347,14 +359,35 @@ def check_cli_setup():
     
     if not status["exceptions_available"]:
         result["missing_dependencies"].append("exceptions module")
-        result["instructions"].append("Ensure exceptions.py is in the same directory as cli.py")
+        result["instructions"].append("Ensure exceptions.py is in the package directory")
+    
+    if not status["cli_available"]:
+        result["missing_dependencies"].append("cli module")
+        result["instructions"].append("Ensure cli module is properly set up")
     
     result["ready"] = len(result["missing_dependencies"]) == 0
     
     if result["ready"]:
-        result["instructions"].append("CLI is ready to use: python cli.py --help")
+        result["instructions"].append("CLI is ready to use: python -m sfirat_haomer.cli --help")
     
     return result
+
+
+def run_cli():
+    """
+    Run the CLI interface programmatically
+    
+    Returns:
+        None or raises exception if CLI not available
+    """
+    if not _CLI_AVAILABLE:
+        raise ImportError("CLI not available. Install with: pip install sfirat-haomer[cli]")
+    
+    try:
+        cli()
+    except Exception as e:
+        print(f"Error running CLI: {e}")
+        raise
 
 
 # Add new convenience functions to __all__
@@ -364,7 +397,8 @@ __all__.extend([
     "current_sefirah",
     "format_omer_display",
     "get_cli_status",
-    "check_cli_setup"
+    "check_cli_setup",
+    "run_cli"
 ])
 
 # Optional: Validate configuration on import with better error handling
@@ -375,7 +409,7 @@ def _validate_on_import():
         if validation_errors:
             import warnings
             warnings.warn(
-                f"Omer Counter configuration validation found issues: {validation_errors}",
+                f"Sfirat HaOmer configuration validation found issues: {validation_errors}",
                 UserWarning,
                 stacklevel=2
             )
@@ -383,7 +417,7 @@ def _validate_on_import():
         # If dependencies are missing, warn but don't fail
         import warnings
         warnings.warn(
-            "Some dependencies may be missing. Please install with: pip install omer-counter[full]",
+            "Some dependencies may be missing. Please install with: pip install sfirat-haomer[full]",
             UserWarning,
             stacklevel=2
         )
@@ -418,3 +452,11 @@ __all__.extend([
     "CLI_SUPPORTED_TRADITIONS",
     "CLI_SUPPORTED_DATE_FORMATS"
 ])
+
+# CLI entry point helper
+def main():
+    """Entry point for CLI when installed as package"""
+    run_cli()
+
+# Add main to __all__
+__all__.append("main")

@@ -1,0 +1,81 @@
+"""
+Information and reference CLI commands for Sfirat HaOmer
+"""
+
+import click
+from typing import Dict, Any
+
+from sfirat_haomer import (
+    find_special_omer_days,
+    get_ana_bekoach_text,
+    get_sefirot_attributes,
+)
+
+from exceptions import (
+    handle_cli_errors,
+)
+
+from ..formatters.output_formatters import (
+    format_omer_day,
+)
+
+
+@click.group()
+def info_commands():
+    """Information and reference commands"""
+    pass
+
+
+@info_commands.command('special')
+@click.pass_context
+@handle_cli_errors
+def special(ctx):
+    """Show all special days during the Omer period"""
+    click.echo("⭐ Special Days during Sefirat HaOmer:")
+    click.echo("=" * 60)
+    
+    special_days = find_special_omer_days()
+    
+    if not special_days:
+        click.echo("No special days found.")
+        return
+    
+    for day in special_days:
+        day_data = day.to_dict()
+        click.echo(f"Day {day_data['day']}: {day_data['special_day_info'].get('name', 'Special Day')}")
+        click.echo(f"Description: {day_data['special_day_info'].get('description', 'N/A')}")
+        click.echo(f"Hebrew: {day_data['text']}")
+        click.echo("-" * 40)
+
+
+@info_commands.command('sefirot')
+@handle_cli_errors
+def sefirot():
+    """Show information about all Sefirot"""
+    click.echo("🔮 The Ten Sefirot:")
+    click.echo("=" * 60)
+    
+    sefirot_attrs = get_sefirot_attributes()
+    
+    for i, sefirah in sefirot_attrs.items():
+        click.echo(f"{i}. {sefirah.get('hebrew', 'N/A')}")
+        click.echo(f"   Transliteration: {sefirah.get('transliteration', 'N/A')}")
+        click.echo(f"   English: {sefirah.get('english', 'N/A')}")
+        click.echo(f"   Attribute: {sefirah.get('attribute', 'N/A')}")
+        click.echo("")
+
+
+@info_commands.command('ana-bekoach')
+@handle_cli_errors
+def ana_bekoach():
+    """Show the Ana BeKoach prayer"""
+    click.echo("🤲 Ana BeKoach Prayer:")
+    click.echo("=" * 60)
+    
+    ana_bekoach_text = get_ana_bekoach_text()
+    
+    for key, lines in ana_bekoach_text.items():
+        click.echo(f"{key.capitalize()}:")
+        for line in lines:
+            click.echo(f"  {line}")
+        click.echo("")
